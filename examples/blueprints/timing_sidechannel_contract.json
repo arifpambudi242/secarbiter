@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SecArbiter Timing Differential & Sidechannel Assertion Contract",
+  "description": "Blueprint for validating blind timing attacks (Blind SQLi, ReDoS, Command Sleep) ruling out network jitter.",
+  "type": "generic",
+  "contract": {
+    "target_endpoint": "/api/search/users?q=admin'%20AND%20(SELECT%20pg_sleep(3))--",
+    "description": "Timing sidechannel verification with minimum delay delta threshold",
+    "predicates": [
+      {
+        "StatusCodeEquals": {
+          "expected": 200,
+          "observed": 200
+        }
+      },
+      {
+        "TimingMinDelayMs": {
+          "baseline_ms": 45,
+          "probe_ms": 3050,
+          "min_delay_ms": 2500
+        }
+      }
+    ]
+  },
+  "verification_rules": [
+    "probe_ms - baseline_ms MUST exceed min_delay_ms",
+    "Ensures transient network lag does not produce false-positive confirmations"
+  ]
+}

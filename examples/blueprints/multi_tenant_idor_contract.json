@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SecArbiter Multi-Tenant IDOR Assertion Contract",
+  "description": "Blueprint for deterministically verifying unauthorized cross-tenant object access without relying on AI speculation.",
+  "type": "idor",
+  "contract": {
+    "resource_owner_session": "tenant_alice_session_uuid",
+    "unauthorized_session": "tenant_bob_session_uuid",
+    "target_resource_id": "invoice_102",
+    "expected_unauthorized_status": 403,
+    "observed_unauthorized_status": 200,
+    "expected_data_substring": "Confidential Security Audit Fee",
+    "observed_body": "{\"id\": \"102\", \"owner\": \"Alice\", \"amount\": 12500, \"description\": \"Confidential Security Audit Fee\"}"
+  },
+  "verification_rules": [
+    "observed_unauthorized_status MUST be 200 (if 401 or 403, status is NotReproduced)",
+    "observed_body MUST contain expected_data_substring",
+    "Resource ownership MUST cross session boundaries"
+  ]
+}

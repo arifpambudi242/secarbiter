@@ -1,0 +1,4 @@
+# Vulnerable Tech Stack Manifest
+werkzeug==0.14.1
+log4j-core==2.14.1
+jquery==1.12.4

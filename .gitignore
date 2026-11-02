@@ -1,0 +1,8 @@
+/target
+.codegraph/
+data/
+**/*.rs.bk
+*.db
+*.db-journal
+.env
+.DS_Store

@@ -1,0 +1,59 @@
+name: SecArbiter Deterministic Security Gate
+
+on:
+  pull_request:
+    branches: [ "main", "staging" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  security-verification-gate:
+    name: Verify Zero Vulnerabilities & Regression Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install SecArbiter Engine
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arifpambudi242/secarbiter/main/install.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Start Ephemeral Staging / Testbed Service
+        run: |
+          python3 -m http.server 8765 &
+          sleep 2
+
+      - name: Scan Dependencies & Tech Stack Banners (SCA)
+        run: |
+          # Fails with exit code 1 if known critical CVEs or vulnerable dependencies are detected
+          secarbiter scan http://127.0.0.1:8765/ --manifest requirements.txt
+
+      - name: Run Deterministic PoC Regression Tests
+        run: |
+          # Automatically runs standalone PoC reproduction scripts committed in test suites
+          if [ -d "tests/security_pocs" ]; then
+            for poc in tests/security_pocs/*.sh; do
+              echo "[+] Running PoC regression test: $poc"
+              # Script exits with 0 if vulnerable, 1 if fixed/remediated
+              if bash "$poc"; then
+                echo "::error file=$poc::Security regression detected! PoC reproduced successfully."
+                exit 1
+              else
+                echo "[OK] PoC test passed (remediation verified)."
+              fi
+            done
+          fi
+
+      - name: Export Redacted Assessment Report
+        if: always()
+        run: |
+          secarbiter report -f markdown -o security_audit_report.md
+        continue-on-error: true
+
+      - name: Upload Security Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: secarbiter-audit-report
+          path: security_audit_report.md

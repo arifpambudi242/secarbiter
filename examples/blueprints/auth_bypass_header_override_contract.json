@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SecArbiter Authentication Bypass Assertion Contract",
+  "description": "Blueprint for proving administrative access without valid credentials via proxy rewrite / header override.",
+  "type": "auth_bypass",
+  "contract": {
+    "protected_endpoint": "/api/admin/secrets",
+    "baseline_status_unauthenticated": 401,
+    "bypass_technique": "X-Original-URL Header Tampering",
+    "bypass_status": 200,
+    "proof_marker": "TOP_SECRET_MASTER_DATABASE_KEY",
+    "observed_body": "{\"admin_vault\": \"TOP_SECRET_MASTER_DATABASE_KEY_9921\", \"status\": \"unlocked\"}"
+  },
+  "verification_rules": [
+    "baseline_status_unauthenticated MUST be 401 or 403 (verifies endpoint is genuinely protected)",
+    "bypass_status MUST be 200",
+    "observed_body MUST contain proof_marker"
+  ]
+}

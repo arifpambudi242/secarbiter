@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "feat/*", "fix/*" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  check-and-lint:
+    name: Code Formatting & Clippy Lints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check Code Formatting
+        run: cargo fmt --check
+
+      - name: Run Clippy Linter
+        run: cargo clippy --workspace -- -D warnings
+
+  test-workspace:
+    name: Workspace Unit & Acceptance Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run Workspace Tests
+        run: cargo test --workspace --verbose
+
+  build-and-e2e:
+    name: Sandbox Docker Build & Live OWASP Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build Hardened Docker Sandbox
+        run: docker build -t secarbiter-sandbox:latest -t pentest-sandbox:latest -f docker/executor.Dockerfile docker/
+
+      - name: Build Release Binaries
+        run: cargo build --release --workspace
+
+      - name: Run Live OWASP Top 10 + CVE Suite
+        run: python3 examples/owasp_top10_suite.py
+
+      - name: Test Developer CLI
+        run: |
+          ./target/release/secarbiter --help
+          ./target/release/secarbiter scan --manifest examples/vulnerable_app/requirements.txt || true

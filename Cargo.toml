@@ -1,0 +1,47 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/pentest-core",
+    "crates/pentest-evidence",
+    "crates/pentest-executor",
+    "crates/pentest-verifier",
+    "crates/pentest-report",
+    "crates/pentest-mcp",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Arif Pambudi <arifpambudi242@gmail.com>"]
+repository = "https://github.com/arifpambudi242/secarbiter"
+readme = "README.md"
+description = "SecArbiter: Deterministic Security Verification Engine, Agentic Pentest MCP Server & Developer CLI"
+keywords = ["mcp", "pentest", "security", "agentic", "verification"]
+categories = ["development-tools", "command-line-utilities"]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.40", features = ["full"] }
+thiserror = "2.0"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+rusqlite = { version = "0.32", features = ["bundled", "chrono", "uuid"] }
+sha2 = "0.10"
+hex = "0.4"
+url = { version = "2.5", features = ["serde"] }
+ipnet = "2.10"
+regex = "1.11"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+async-trait = "0.1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+bollard = "0.18"
+tempfile = "3.13"
+clap = { version = "4.5", features = ["derive", "env"] }
+pentest-core = { path = "crates/pentest-core" }
+pentest-evidence = { path = "crates/pentest-evidence" }
+pentest-executor = { path = "crates/pentest-executor" }
+pentest-verifier = { path = "crates/pentest-verifier" }
+pentest-report = { path = "crates/pentest-report" }
