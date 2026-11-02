@@ -168,10 +168,10 @@ secarbiter poc -f <FINDING_UUID> -t python -o reproduce_poc.py
 # Export redacted security assessment report
 secarbiter report -e <ENGAGEMENT_UUID> -f markdown -o audit_report.md
 
-# Auto-configure MCP client (Claude Desktop/Cursor) & install Agent SKILL.md
-secarbiter install all
-# Or individually:
+# Auto-configure MCP client (Claude Desktop / Cursor IDE)
 secarbiter install mcp
+
+# Install Agent operational SKILL.md into local skills directory
 secarbiter install skill
 ```
 
